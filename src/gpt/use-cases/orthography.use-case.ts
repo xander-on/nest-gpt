@@ -1,21 +1,32 @@
-import OpenAI from "openai";
+import { GoogleGenerativeAI, GenerativeModel } from "@google/generative-ai";
 
-
-interface Options{
+interface Options {
   prompt: string;
 }
 
-
-export const orthographyCheckUseCase = async (openai:OpenAI, options: Options) => {
-
+export const orthographyCheckUseCase = async (
+  model: GenerativeModel,
+  options: Options
+) => {
   const { prompt } = options;
 
-  const completion = await openai.chat.completions.create({
-    messages: [{ role: "system", content: "Eres un asistente muy util" }],
-    model: "gpt-4o",
-  });
+  const finalPrompt = `
+Eres un asistente muy útil.
+Corrige la ortografía del siguiente texto sin cambiar el significado:
 
-  console.log(completion);
+${prompt}
+`;
 
-  return completion.choices[0];
-}
+  try {
+    const result = await model.generateContent(finalPrompt);
+
+    return {
+      content: result.response.text(),
+    };
+
+  } catch (error) {
+    console.error("Gemini error:", error);
+
+    throw new Error("Error procesando texto con IA");
+  }
+};
