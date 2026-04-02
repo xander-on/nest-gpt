@@ -1,32 +1,37 @@
-import { GoogleGenerativeAI, GenerativeModel } from "@google/generative-ai";
+import { AIProvider } from "../interfaces/AIProvider";
 
 interface Options {
   prompt: string;
 }
 
 export const orthographyCheckUseCase = async (
-  model: GenerativeModel,
+  aiProvider: AIProvider,
   options: Options
 ) => {
   const { prompt } = options;
 
   const finalPrompt = `
-Eres un asistente muy útil.
-Corrige la ortografía del siguiente texto sin cambiar el significado:
+Te seran proveidos textos en español con posibles errores ortograficos y gramaticales,
+Las palabras usadas deben existir en el diccionario de la real academia de la lengua española,
+Debes de responder en formato JSON,
+tu tarea es corregirlos y retornar informacion soluciones,
+tambien debes de dar un porcentaje de acierto por el usuario,
+
+si no hay errores, debes retornar un mensaje de felicitaciones.
+
+Ejemplo de salida:
+{
+  userScore: number,
+  errors: string[], // ["error" -> "correccion"]
+  message: string, // Usa emojis para felicitar al usuario
+}
+
+Responde SOLO en JSON válido.
+NO uses markdown.
+NO uses \`\`\`json.
 
 ${prompt}
 `;
 
-  try {
-    const result = await model.generateContent(finalPrompt);
-
-    return {
-      content: result.response.text(),
-    };
-
-  } catch (error) {
-    console.error("Gemini error:", error);
-
-    throw new Error("Error procesando texto con IA");
-  }
+  return await aiProvider.generateText(finalPrompt);
 };
