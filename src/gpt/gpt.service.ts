@@ -1,8 +1,8 @@
 import { Injectable } from "@nestjs/common";
 import { AIProvider } from "./interfaces/AIProvider";
 import { GeminiProvider } from "./providers/gemini.provider";
-import { OrthographyDto, ProsConstDiscusserDto } from "./dtos";
-import { orthographyCheckUseCase, prosConsDiscusserUseCase, prosConsStreamUseCase } from "./use-cases";
+import { OrthographyDto, ProsConstDiscusserDto, TranslateTextDto } from "./dtos";
+import { orthographyCheckUseCase, prosConsDiscusserUseCase, prosConsStreamUseCase, translateTextUseCase } from "./use-cases";
 
 @Injectable()
 export class GptService {
@@ -14,10 +14,8 @@ export class GptService {
     // this.aiProvider = new OpenAIProvider(process.env.OPENAI_API_KEY!);
   }
 
-  async orthographyCheck(orthographyDto: OrthographyDto) {
-    return await orthographyCheckUseCase(this.aiProvider, {
-      prompt: orthographyDto.prompt
-    });
+  async orthographyCheck({prompt}: OrthographyDto) {
+    return await orthographyCheckUseCase(this.aiProvider, { prompt });
   }
 
 
@@ -25,8 +23,11 @@ export class GptService {
     return await prosConsDiscusserUseCase(this.aiProvider, { prompt });
   }
 
-
   async prosConsStream({prompt}: ProsConstDiscusserDto) {
     return await prosConsStreamUseCase(this.aiProvider, { prompt });
+  }
+
+  async translateText({prompt, lang}: TranslateTextDto) {
+    return await translateTextUseCase(this.aiProvider, { prompt, lang });
   }
 }

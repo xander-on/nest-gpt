@@ -1,14 +1,14 @@
 import { AIProvider } from "../interfaces/AIProvider";
 
-interface Options {
+interface Data {
   prompt: string;
 }
 
 export const orthographyCheckUseCase = async (
   aiProvider: AIProvider,
-  options: Options
+  data: Data
 ) => {
-  const { prompt } = options;
+  const { prompt } = data;
 
   const finalPrompt = `
 Te seran proveidos textos en español con posibles errores ortograficos y gramaticales,
