@@ -10,10 +10,10 @@ interface Data {
 
 export const translateTextUseCase = async (
   aiProvider: AIProvider,
-  options: Data
+  data: Data
 ) => {
 
-  const { prompt, lang } = options;
+  const { prompt, lang } = data;
 
   const finalPrompt= `
     Traduce el siguiente texto al idioma ${lang}:${prompt}

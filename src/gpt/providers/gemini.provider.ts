@@ -1,67 +1,116 @@
-import { GoogleGenerativeAI } from "@google/generative-ai";
+import { GoogleGenAI } from "@google/genai";
 import { AIConfig, AIProvider } from "../interfaces/AIProvider";
+import wav from "wav";
+import { PassThrough } from "stream";
 
 export class GeminiProvider implements AIProvider {
 
-  private model;
+  private ai;
 
   constructor(apiKey: string) {
-    const genAI = new GoogleGenerativeAI(apiKey);
-
-    this.model = genAI.getGenerativeModel({
-      model: "gemini-2.5-flash",
-    });
+    this.ai = new GoogleGenAI({ apiKey });
   }
 
-  async generateText(prompt: string, config?: AIConfig ): Promise<string> {
+  async generateText(prompt: string, config?: AIConfig): Promise<string> {
 
-    const formatResponse = config?.formatResponse === "json" 
-      ? "application/json" 
+    const formatResponse = config?.formatResponse === "json"
+      ? "application/json"
       : "text/plain";
 
     const temperature = config?.temperature ?? 0.3;
     const maxTokens = config?.maxTokens ?? 1500;
 
-    const result = await this.model.generateContent({
-      contents: [{ role: "user", parts: [{ text: prompt }] }],
-      generationConfig: {
+    const response = await this.ai.models.generateContent({
+      model: "gemini-2.5-flash",
+      contents: prompt,
+      config: {
         temperature,
-        responseMimeType: formatResponse,
         maxOutputTokens: maxTokens,
-      },
+        responseMimeType: formatResponse,
+      }
     });
 
-    const resp = result.response.candidates[0].content.parts[0].text ?? "";
-    return resp;
+    return response.text ?? "";
   }
-
 
   async *generateTextStream(
     prompt: string,
     config?: AIConfig
   ): AsyncIterable<string> {
 
-    const formatResponse = config?.formatResponse === "json" 
-      ? "application/json" 
-      : "text/plain";
-
     const temperature = config?.temperature ?? 0.3;
     const maxTokens = config?.maxTokens ?? 1500;
 
-    const result = await this.model.generateContentStream({
-      contents: [{ role: "user", parts: [{ text: prompt }] }],
-      generationConfig: {
+    const stream = await this.ai.models.generateContentStream({
+      model: "gemini-2.5-flash",
+      contents: prompt,
+      config: {
         temperature,
-        responseMimeType: formatResponse,
         maxOutputTokens: maxTokens,
+      }
+    });
+
+    for await (const chunk of stream) {
+      if (chunk.text) yield chunk.text;
+    }
+  }
+
+  async generateAudio(prompt: string, config?: AIConfig): Promise<Buffer> {
+
+    const voiceName = config?.voiceName ?? "Kore";
+
+    const response = await this.ai.models.generateContent({
+      model: "gemini-2.5-flash-preview-tts",
+      contents: [{ parts: [{ text: prompt }] }],
+      config: {
+        responseModalities: ["AUDIO"],
+        speechConfig: {
+          voiceConfig: {
+            prebuiltVoiceConfig: {
+              voiceName,
+            },
+          },
+        },
       },
     });
 
-    for await (const chunk of result.stream) {
-      const text = chunk.text();
-      if (text) yield text
+    const audioPart = response.candidates?.[0]?.content?.parts?.find(
+      (p: any) => p.inlineData
+    );
+
+    if (!audioPart?.inlineData?.data) {
+      throw new Error("No se recibió audio del modelo");
     }
 
+     const pcmBuffer = Buffer.from(audioPart.inlineData.data, "base64");
+     return await this.pcmToWavBuffer(pcmBuffer);
+  }
+
+
+  private pcmToWavBuffer(
+    pcmBuffer: Buffer,
+    sampleRate = 24000
+  ): Promise<Buffer> {
+
+    return new Promise((resolve, reject) => {
+
+      const writer = new wav.Writer({
+        channels: 1,
+        sampleRate,
+        bitDepth: 16,
+      });
+
+      const stream = new PassThrough();
+      const chunks: Buffer[] = [];
+
+      stream.on("data", (chunk) => chunks.push(chunk));
+      stream.on("end", () => resolve(Buffer.concat(chunks)));
+      stream.on("error", reject);
+
+      writer.pipe(stream);
+      writer.write(pcmBuffer);
+      writer.end();
+    });
   }
 
 }

@@ -7,12 +7,18 @@ export interface AIProvider {
   generateTextStream?(
     prompt: string,
     config?: AIConfig
-  ): AsyncIterable<string>; 
+  ): AsyncIterable<string>;
+
+  generateAudio(
+    prompt: string, 
+    config?: AIConfig
+  ): Promise<Buffer>;
 }
 
 
 export interface AIConfig {
-  formatResponse?: "markdown" | "text" | "json";
-  temperature?: number;
-  maxTokens?: number;
+  formatResponse ?: "markdown" | "text" | "json";
+  temperature    ?: number;
+  maxTokens      ?: number;
+  voiceName      ?: string;
 }
