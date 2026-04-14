@@ -33,6 +33,8 @@ export class GeminiProvider implements AIProvider {
     return response.text ?? "";
   }
 
+
+
   async *generateTextStream(
     prompt: string,
     config?: AIConfig
@@ -111,6 +113,32 @@ export class GeminiProvider implements AIProvider {
       writer.write(pcmBuffer);
       writer.end();
     });
+  }
+
+
+
+  async generateTextFromAudio(
+    prompt: string,
+    audio: { data: string; mimeType: string }
+  ): Promise<string> {
+    const response = await this.ai.models.generateContent({
+      model: "gemini-2.5-flash",
+      contents: [
+        {
+          parts: [
+            { text: prompt },
+            {
+              inlineData: {
+                mimeType: audio.mimeType,
+                data: audio.data,
+              },
+            },
+          ],
+        },
+      ],
+    });
+
+    return response.text ?? "";
   }
 
 }

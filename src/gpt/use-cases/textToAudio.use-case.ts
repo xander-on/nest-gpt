@@ -25,7 +25,7 @@ export const textToAudioUseCase = async(
   const { prompt, voice } = data;
   const selectedVoice = voices[voice?.toLowerCase() ?? 'zephyr'] ;
 
-  const folderPath = path.resolve(__dirname, "../../../generated/audios");
+  const folderPath = path.resolve(__dirname, "../../../audios/generated");
   const speechFile = path.resolve(`${folderPath}/${Date.now()}.wav`);
   await fs.mkdirSync(folderPath, { recursive: true });
 

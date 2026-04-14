@@ -2,7 +2,7 @@ import { Injectable } from "@nestjs/common";
 import { AIProvider } from "./interfaces/AIProvider";
 import { GeminiProvider } from "./providers/gemini.provider";
 import { OrthographyDto, ProsConstDiscusserDto, TextToAudioDto, TranslateTextDto } from "./dtos";
-import { orthographyCheckUseCase, prosConsDiscusserUseCase, prosConsStreamUseCase, textToAudioGetterUseCase, textToAudioUseCase, translateTextUseCase } from "./use-cases";
+import { audioToTextUseCase, orthographyCheckUseCase, prosConsDiscusserUseCase, prosConsStreamUseCase, textToAudioGetterUseCase, textToAudioUseCase, translateTextUseCase } from "./use-cases";
 
 @Injectable()
 export class GptService {
@@ -36,5 +36,9 @@ export class GptService {
 
   async textToAudioGetter(fileId: string) {
     return await textToAudioGetterUseCase(fileId);
+  }
+
+  async audioToText( audioFile: Express.Multer.File, {prompt}: TextToAudioDto) {
+    return await audioToTextUseCase(this.aiProvider, { audioFile, prompt });
   }
 }

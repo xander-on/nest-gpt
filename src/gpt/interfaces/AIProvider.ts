@@ -13,6 +13,14 @@ export interface AIProvider {
     prompt: string, 
     config?: AIConfig
   ): Promise<Buffer>;
+
+  generateTextFromAudio: (
+    prompt: string,
+    audio: {
+      data: string;
+      mimeType: string;
+    }
+  ) => Promise<string>;
 }
 
 
