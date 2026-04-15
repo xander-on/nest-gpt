@@ -20,12 +20,28 @@ export const audioToTextUseCase = async (
     Transcribe el siguiente audio en texto.
     Devuelve solo la transcripción, sin explicaciones.
 
-    puedes devolver en arrays cada objeto es un parrafo con el formato como el siguiente ejemplo:
+    Responde SOLO en JSON válido.
+    NO uses markdown.
+    NO uses \`\`\`json.
+
+    Ejemplo de salida:
+
+    {
+      "totalTime": "00:00:01",
+      "lang": "es",
+      "segments":[],
+      "rawText": "texto traido del audio",
+    }
+
+    los segments deben ser parrafos con maximo unos 180 caracteres y se pasa de esta cantidad cortalos en el signo de punto (.) anterior a los 180 caracteres
+
+    puedes devolver las "segments" en arrays con el formato como el siguiente ejemplo horas:minutos:segundos ej:
     [
       {text: "texto traido del audio", time: "00:00:01"}, 
       {text: "texto traido del audio", time: "00:00:05"}, 
       {text: "texto traido del audio", time: "00:00:12"}, 
     ]
+
     ${prompt}
   `;
 
@@ -35,12 +51,11 @@ export const audioToTextUseCase = async (
   }
 
   const response = await aiProvider.generateTextFromAudio(finalPrompt, dataAudio);
-  let parsed;
 
+  let parsed;
   try { parsed = JSON.parse(response);} 
   catch { parsed = response; }
 
-  return {
-    data: parsed,
-  };
+  return parsed;
 };
+

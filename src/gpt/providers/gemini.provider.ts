@@ -119,7 +119,7 @@ export class GeminiProvider implements AIProvider {
 
   async generateTextFromAudio(
     prompt: string,
-    audio: { data: string; mimeType: string }
+    audio: { data: string; mimeType: string },
   ): Promise<string> {
     const response = await this.ai.models.generateContent({
       model: "gemini-2.5-flash",
@@ -136,6 +136,9 @@ export class GeminiProvider implements AIProvider {
           ],
         },
       ],
+      config: {
+        responseMimeType: "application/json",
+      }
     });
 
     return response.text ?? "";
