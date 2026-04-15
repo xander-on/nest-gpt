@@ -27,21 +27,23 @@ export const audioToTextUseCase = async (
     Ejemplo de salida:
 
     {
-      "totalTime": "00:00:01",
+      "duration": 578,
       "lang": "es",
       "segments":[],
       "rawText": "texto traido del audio",
     }
 
-    los segments deben ser parrafos con maximo unos 180 caracteres y se pasa de esta cantidad cortalos en el signo de punto (.) anterior a los 180 caracteres
+    duration debe ser siempre en segundos y es un number,
+    los segments deben ser parrafos siempre con maximo unos 180 caracteres y se pasa de esta cantidad cortalos en el signo de punto (.) anterior a los 180 caracteres
 
     puedes devolver las "segments" en arrays con el formato como el siguiente ejemplo horas:minutos:segundos ej:
     [
-      {text: "texto traido del audio", time: "00:00:01"}, 
-      {text: "texto traido del audio", time: "00:00:05"}, 
-      {text: "texto traido del audio", time: "00:00:12"}, 
+      {text: "texto traido del audio no mas de 180 caracteres", time: "00:00:01"}, 
+      {text: "texto traido del audio no mas de 180 caracteres", time: "00:00:05"}, 
+      {text: "texto traido del audio no mas de 180 caracteres", time: "00:00:12"}, 
     ]
 
+    por favor respeta siempre el max de 180 caracteres en las "segments"
     ${prompt}
   `;
 
