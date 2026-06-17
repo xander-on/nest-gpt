@@ -1,5 +1,5 @@
 import { GoogleGenAI } from "@google/genai";
-import { AIConfig, AIProvider } from "../interfaces/AIProvider";
+import { AIConfig, AIProvider, GenerateImageResponse } from "../interfaces/AIProvider";
 import wav from "wav";
 import { PassThrough } from "stream";
 
@@ -32,7 +32,6 @@ export class GeminiProvider implements AIProvider {
 
     return response.text ?? "";
   }
-
 
 
   async *generateTextStream(
@@ -116,7 +115,6 @@ export class GeminiProvider implements AIProvider {
   }
 
 
-
   async generateTextFromAudio(
     prompt: string,
     audio: { data: string; mimeType: string },
@@ -142,6 +140,33 @@ export class GeminiProvider implements AIProvider {
     });
 
     return response.text ?? "";
+  }
+
+
+  async generateImage(
+    options:{
+      prompt: string;
+      originalImage?: string;
+      maskImage?: string;
+    }
+  ): Promise<GenerateImageResponse> {
+
+
+    try{
+
+      const response = await this.ai.models.generateContent({
+        model: "gemini-2.5-flash-image",
+        contents: options.prompt,
+      });
+
+      console.log("Gemini image response:", response);
+
+      return response.candidates[0].content.parts[0].inlineData.data;
+    }catch(error){
+      console.error("Error generating image with Gemini:", error);
+      throw error;
+    }
+
   }
 
 }

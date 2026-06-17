@@ -21,6 +21,15 @@ export interface AIProvider {
       mimeType: string;
     }
   ) => Promise<string>;
+
+
+  generateImage: (
+    options: {
+      prompt: string;
+      originalImage?: string;
+      maskImage?: string;
+    }
+  ) => Promise<GenerateImageResponse>;
 }
 
 
@@ -29,4 +38,12 @@ export interface AIConfig {
   temperature    ?: number;
   maxTokens      ?: number;
   voiceName      ?: string;
+}
+
+
+export interface GenerateImageResponse {
+  url?: string;
+  localPath?: string;
+  base64?: string;
+  revisedPrompt?: string;
 }

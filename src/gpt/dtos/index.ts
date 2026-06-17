@@ -3,3 +3,5 @@ export * from './prosConsDiscusser.dto';
 export * from './translateText.dto';  
 export * from './textToAudio.dto';
 export * from './audioToText.dto';
+export * from './imageGeneration.dto';
+export * from './imageVariation.dto';

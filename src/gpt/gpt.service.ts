@@ -1,17 +1,24 @@
-import { Injectable } from "@nestjs/common";
+import { Injectable, NotFoundException } from "@nestjs/common";
 import { AIProvider } from "./interfaces/AIProvider";
 import { GeminiProvider } from "./providers/gemini.provider";
-import { OrthographyDto, ProsConstDiscusserDto, TextToAudioDto, TranslateTextDto } from "./dtos";
-import { audioToTextUseCase, orthographyCheckUseCase, prosConsDiscusserUseCase, prosConsStreamUseCase, textToAudioGetterUseCase, textToAudioUseCase, translateTextUseCase } from "./use-cases";
+import { ImageGenerationDto, ImageVariationDto, OrthographyDto, ProsConstDiscusserDto, TextToAudioDto, TranslateTextDto } from "./dtos";
+import { audioToTextUseCase, imageGenerationUseCase, imageVariationUseCase, orthographyCheckUseCase, prosConsDiscusserUseCase, prosConsStreamUseCase, textToAudioGetterUseCase, textToAudioUseCase, translateTextUseCase } from "./use-cases";
+import { OpenAIProvider } from "./providers/openai.provider";
+import * as fs from "fs";
+import * as path from "path";
+import OpenAI from "openai";
 
 @Injectable()
 export class GptService {
 
   private aiProvider: AIProvider;
+  private openAiProvider: AIProvider;
+  private openai: OpenAI
 
   constructor() {
     this.aiProvider = new GeminiProvider(process.env.GEMINI_API_KEY!);
-    // this.aiProvider = new OpenAIProvider(process.env.OPENAI_API_KEY!);
+    this.openAiProvider = new OpenAIProvider(process.env.OPENAI_API_KEY!);
+    this.openai = new OpenAI({apiKey:process.env.OPENAI_API_KEY!});
   }
 
   async orthographyCheck({prompt}: OrthographyDto) {
@@ -40,5 +47,20 @@ export class GptService {
 
   async audioToText( audioFile: Express.Multer.File, {prompt}: TextToAudioDto) {
     return await audioToTextUseCase(this.aiProvider, { audioFile, prompt });
+  }
+
+  async imageGeneration(imageGenerationDto: ImageGenerationDto) {
+    return await imageGenerationUseCase(this.openAiProvider, imageGenerationDto);
+  }
+
+  getGeneratedImage(fileName:string){
+    const filePath = path.resolve('./', './generated/images/', fileName);
+    const fileExists = fs.existsSync(filePath);
+    if (!fileExists) throw new NotFoundException('No se encontro el archivo');
+    return filePath;
+  }
+
+  async imageVariation({baseImage}: ImageVariationDto){
+    return await imageVariationUseCase(this.openai, {baseImage});
   }
 }
